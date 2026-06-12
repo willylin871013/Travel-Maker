@@ -10,6 +10,8 @@ on:
 jobs:
   build:
     runs-on: windows-latest
+    env:
+      PYTHONUTF8: "1" # Windows 終端機預設 cp1252,印中文會掛掉
     steps:
       - uses: actions/checkout@v4
 
