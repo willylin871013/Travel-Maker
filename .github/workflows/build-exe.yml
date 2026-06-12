@@ -1,0 +1,34 @@
+name: Build Windows EXE
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "excel-merger/**"
+      - ".github/workflows/build-exe.yml"
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install openpyxl pyinstaller
+
+      - name: Build EXE
+        run: pyinstaller --onefile --noconsole --name ExcelMerger excel-merger/excel_merger.py
+
+      - name: Smoke test (merge logic without GUI)
+        run: python -c "from pathlib import Path; import tempfile, excel_merger as m; d = Path(tempfile.mkdtemp()); m.create_demo_files(d); out = m.merge_excel_files(m.find_excel_files(d)); print('OK:', out)"
+        working-directory: excel-merger
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ExcelMerger-Windows
+          path: dist/ExcelMerger.exe
